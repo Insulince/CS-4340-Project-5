@@ -107,7 +107,7 @@ class Matrix {
         return this.data.get(row);
     }
 
-    public int getCell(final int row, final int column) {
+    int getCell(final int row, final int column) {
         return this.data.get(row).get(column);
     }
 
@@ -115,9 +115,9 @@ class Matrix {
         final ArrayList<ArrayList<Integer>> transposedData = new ArrayList<>();
 
         int maximumColumnsEncountered = 0;
-        for (int i = 0; i < this.data.size(); i++) {
-            if (this.data.get(i).size() > maximumColumnsEncountered) {
-                maximumColumnsEncountered = this.data.get(i).size();
+        for (ArrayList<Integer> datum : this.data) {
+            if (datum.size() > maximumColumnsEncountered) {
+                maximumColumnsEncountered = datum.size();
             }
         }
 
@@ -236,9 +236,6 @@ class NonInvertibleMatrixException extends Exception {
 }
 
 class LinearRegression {
-    private static final int MAXIMUM_TRAINING_ITERATIONS = 100;
-    private static final double MINIMUM_GRADIENT = 1.0;
-
     private final Data data;
     private final ArrayList<Weight> weights;
     private final int n;
@@ -289,33 +286,30 @@ class LinearRegression {
                 '}';
     }
 
-    public void train() {
-        //(X*w - Y)^2
-        //(X*w*X*w - 2*Y*X*w - Y^2)
-
-
-        ArrayList<ArrayList<Integer>> xTx = new ArrayList<>();
-
-        for (int i = 0; i < this.n; i++) {
-            this.data.getFeatures().get(i);
-
-            xTx.add(new ArrayList<>());
-
-            for (int j = 0; j < this.d; j++) {
-                for (int k = 0; k < this.d; k++) {
-                    xTx.get(i).add(this.data.getFeatures().get(i).getFeatures().get(j).getValue() * this.data.getFeatures().get(i).getFeatures().get(k).getValue());
-                }
-            }
-        }
-
-//        double determinant = determinant();
-
-        for (int i = 0; i < this.d; i++) {
-            for (int j = 0; j < this.d; j++) {
-                //Invert
-            }
-        }
-    }
+//    public void train() {
+//        //(X*w - Y)^2
+//        //(X*w*X*w - 2*Y*X*w - Y^2)
+//
+//        ArrayList<ArrayList<Integer>> xTx = new ArrayList<>();
+//
+//        for (int i = 0; i < this.n; i++) {
+//            this.data.getFeatures().get(i);
+//
+//            xTx.add(new ArrayList<>());
+//
+//            for (int j = 0; j < this.d; j++) {
+//                for (int k = 0; k < this.d; k++) {
+//                    xTx.get(i).add(this.data.getFeatures().get(i).getFeatures().get(j).getValue() * this.data.getFeatures().get(i).getFeatures().get(k).getValue());
+//                }
+//            }
+//        }
+//
+//        for (int i = 0; i < this.d; i++) {
+//            for (int j = 0; j < this.d; j++) {
+//                //Invert
+//            }
+//        }
+//    }
 
     private double E_in() {
         double E_in = 0.0;
@@ -392,7 +386,7 @@ class Feature {
 
     private final int value;
 
-    Feature(final int value) {
+    private Feature(final int value) {
         this.value = value;
     }
 
@@ -436,7 +430,7 @@ class Weight {
         this(Math.random());
     }
 
-    Weight(final double value) {
+    private Weight(final double value) {
         this.value = value;
     }
 
