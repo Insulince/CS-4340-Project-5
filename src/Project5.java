@@ -16,10 +16,8 @@ public class Project5 {
             Ys.add(randomSampleFunction(X));
         }
 
-        System.out.println(Xs);
-        System.out.println(Ys);
-
-        LinearRegression linearRegression = new LinearRegression(Xs, Ys);
+        final LinearRegression linearRegression = new LinearRegression(Xs, Ys);
+        System.out.println(linearRegression.getLinearRegressionResult().toResultString());
     }
 
     private static double randomDouble(final double lowerBoundInclusive, final double upperBoundInclusive) {
@@ -46,6 +44,7 @@ class LinearRegression {
         LinearRegression.LAMBDAS.add(LAMBDA_4);
     }
 
+    private final LinearRegressionResult linearRegressionResult;
     private final ArrayList<Double> Xs;
     private final ArrayList<Double> Ys;
     private final ArrayList<Double> weights;
@@ -56,13 +55,20 @@ class LinearRegression {
     private final int sumXSquared;
     private final double a;
     private final double b;
-    private final String regressionAlgorithm;
-    private final String regularizedRegressionAlgorithm;
+    private final String regressionLine;
+    private final String regularizedRegressionLine;
 
     LinearRegression(final ArrayList<Double> Xs, final ArrayList<Double> Ys) throws Exception {
+        this.linearRegressionResult = new LinearRegressionResult();
+        this.linearRegressionResult.setLambdas(LinearRegression.LAMBDAS);
+
         if (Xs.size() == Ys.size()) {
             this.Xs = Xs;
+            this.linearRegressionResult.setXs(this.Xs);
+
             this.Ys = Ys;
+            this.linearRegressionResult.setYs(this.Ys);
+
             this.weights = new ArrayList<>();
             this.n = this.Xs.size();
 
@@ -77,26 +83,25 @@ class LinearRegression {
             this.a = this.calculateA();
             this.b = this.calculateB();
 
-            this.regressionAlgorithm = "y=" + this.a + (this.b >= 0 ? "*x+" + this.b : "*x-" + -this.b);
+            this.regressionLine = "y=" + this.a + (this.b >= 0 ? "*x+" + this.b : "*x-" + -this.b);
+            this.linearRegressionResult.setRegressionLine(this.regressionLine);
 
-            this.regularizedRegressionAlgorithm = this.calculateRegularizedRegression();
+            this.regularizedRegressionLine = this.calculateRegularizedRegression();
+            this.linearRegressionResult.setRegularizedRegressionLine(this.regularizedRegressionLine);
         } else {
             throw new Exception("Number of Xs and number of Ys differ, cannot preform linear regression.");
         }
     }
 
-    String getRegressionAlgorithm() {
-        return this.regressionAlgorithm;
-    }
-
-    String getRegularizedRegressionAlgorithm() {
-        return this.regularizedRegressionAlgorithm;
+    LinearRegressionResult getLinearRegressionResult() {
+        return linearRegressionResult;
     }
 
     @Override
     public String toString() {
         return "LinearRegression{" +
-                "Xs=" + this.Xs +
+                "linearRegressionResult=" + linearRegressionResult +
+                ", Xs=" + this.Xs +
                 ", Ys=" + this.Ys +
                 ", weights=" + this.weights +
                 ", n=" + this.n +
@@ -106,7 +111,8 @@ class LinearRegression {
                 ", sumXSquared=" + this.sumXSquared +
                 ", a=" + this.a +
                 ", b=" + this.b +
-                ", regressionAlgorithm='" + this.regressionAlgorithm + '\'' +
+                ", regressionLine='" + this.regressionLine + '\'' +
+                ", regularizedRegressionLine='" + this.regularizedRegressionLine + '\'' +
                 '}';
     }
 
@@ -164,22 +170,14 @@ class LinearRegression {
         String regularizedRegressionLine;
 
         double optimalLambda = this.calculateOptimalLambdaViaCrossValidation();
+        this.linearRegressionResult.setFinalLambda(optimalLambda);
 
-        //Do something else here
+        final double final_E_in = this.calculate_E_aug(this.weights, this.Xs, this.Ys, optimalLambda);
+        this.linearRegressionResult.setFinal_E_in(final_E_in);
 
-        regularizedRegressionLine = "y=" + this.a + (this.b >= 0 ? "*x+" + this.b : "*x-" + -this.b);
+        regularizedRegressionLine = "y=" + (this.a + optimalLambda) + (this.b >= 0 ? "*x+" + (this.b - optimalLambda) : "*x-" + -(this.b - optimalLambda));
         System.out.println("Regularized regression line is: \"" + regularizedRegressionLine + "\"");
         return regularizedRegressionLine;
-    }
-
-    private double ridgeRegression(final double lambda) {
-        double wTw = 0.0;
-
-        for (final double weight : this.weights) {
-            wTw += Math.pow(weight, 2);
-        }
-
-        return calculate_E_in(this.weights, this.Xs, this.Ys) + lambda * wTw;
     }
 
     private double calculateOptimalLambdaViaCrossValidation() {
@@ -193,6 +191,14 @@ class LinearRegression {
 
             double current_E_cv = this.calculate_E_cv(this.weights, LinearRegression.LAMBDAS.get(i));
 
+            ArrayList<Double> temporaryResult_E_ins = this.linearRegressionResult.getE_ins();
+            temporaryResult_E_ins.add(i, this.calculate_E_in(this.weights, this.Xs, this.Ys));
+            this.linearRegressionResult.setE_ins(temporaryResult_E_ins);
+
+            ArrayList<Double> temporaryResult_E_Cvs = this.linearRegressionResult.getE_cvs();
+            temporaryResult_E_Cvs.add(i, current_E_cv);
+            this.linearRegressionResult.setE_cvs(temporaryResult_E_Cvs);
+
             if (current_E_cv < smallest_E_cv) {
                 System.out.println("----This lambda's E_cv (lambda: \"" + LinearRegression.LAMBDAS.get(i) + "\", E_cv: \"" + current_E_cv + "\") is better than the best lambda's E_cv so far (lambda: \"" + optimalLambda + "\", E_cv: \"" + smallest_E_cv + "\"), reassigning it.");
 
@@ -203,7 +209,7 @@ class LinearRegression {
             }
         }
 
-        System.out.println("--Calculate optimal lambda is \"" + optimalLambda + "\".");
+        System.out.println("--Calculated optimal lambda to be \"" + optimalLambda + "\".");
         return optimalLambda;
     }
 
@@ -228,8 +234,8 @@ class LinearRegression {
         }
 
         Double sumLeaveOneOut_E_aug = 0.0;
-        for (int i = 0; i < allLeaveOneOut_E_aug.size(); i++) {
-            sumLeaveOneOut_E_aug += allLeaveOneOut_E_aug.get(i);
+        for (final Double leaveOneOut_E_aug : allLeaveOneOut_E_aug) {
+            sumLeaveOneOut_E_aug += leaveOneOut_E_aug;
         }
 
         E_cv = sumLeaveOneOut_E_aug / this.n;
@@ -247,7 +253,7 @@ class LinearRegression {
             wTw += Math.pow(weight, 2);
         }
 
-        E_aug = this.calculate_E_in(weights, Xs, Ys) + lambda * wTw;
+        E_aug = this.calculate_E_in(weights, Xs, Ys) + lambda * wTw; // Ridge regression happens here.
         System.out.println("--------Calculated E_aug for lambda \"" + lambda + "\" to be \"" + E_aug + "\".");
         return E_aug;
     }
@@ -278,5 +284,107 @@ class LinearRegression {
         double wTx = weights.get(0) * LinearRegression.X_0 + weights.get(1) * X_1;
         System.out.println("------------Calculated wTx to be \"" + wTx + "\".");
         return wTx;
+    }
+}
+
+class LinearRegressionResult {
+    private ArrayList<Double> Xs;
+    private ArrayList<Double> Ys;
+    private String regressionLine;
+    private ArrayList<Double> lambdas;
+    private ArrayList<Double> E_ins = new ArrayList<>();
+    private ArrayList<Double> E_cvs = new ArrayList<>();
+    private double finalLambda;
+    private String regularizedRegressionLine;
+    private double final_E_in;
+
+    LinearRegressionResult() {
+    }
+
+    void setXs(final ArrayList<Double> xs) {
+        Xs = xs;
+    }
+
+    void setYs(final ArrayList<Double> ys) {
+        Ys = ys;
+    }
+
+    void setRegressionLine(final String regressionLine) {
+        this.regressionLine = regressionLine;
+    }
+
+    void setLambdas(final ArrayList<Double> lambdas) {
+        this.lambdas = lambdas;
+    }
+
+    ArrayList<Double> getE_ins() {
+        return E_ins;
+    }
+
+    void setE_ins(final ArrayList<Double> E_ins) {
+        this.E_ins = E_ins;
+    }
+
+    ArrayList<Double> getE_cvs() {
+        return E_cvs;
+    }
+
+    void setE_cvs(final ArrayList<Double> E_cvs) {
+        this.E_cvs = E_cvs;
+    }
+
+    void setFinalLambda(final double finalLambda) {
+        this.finalLambda = finalLambda;
+    }
+
+    void setRegularizedRegressionLine(final String regularizedRegressionLine) {
+        this.regularizedRegressionLine = regularizedRegressionLine;
+    }
+
+    void setFinal_E_in(final double final_E_in) {
+        this.final_E_in = final_E_in;
+    }
+
+    @Override
+    public String toString() {
+        return "LinearRegressionResult{" +
+                "Xs=" + this.Xs +
+                ", Ys=" + this.Ys +
+                ", regressionLine='" + this.regressionLine + '\'' +
+                ", lambdas=" + this.lambdas +
+                ", E_ins=" + this.E_ins +
+                ", E_cvs=" + this.E_cvs +
+                ", finalLambda=" + this.finalLambda +
+                ", regularizedRegressionLine='" + this.regularizedRegressionLine + '\'' +
+                ", final_E_in=" + this.final_E_in +
+                '}';
+    }
+
+    String toResultString() {
+        StringBuilder output = new StringBuilder("\n========================= RESULTS =========================");
+
+        output.append("\n(a) Twelve (X, Y) coordinate pairs: ");
+        for (int i = 0; i < this.Xs.size(); i++) {
+            output.append("\n    • (").append(this.Xs.get(i)).append(", ").append(this.Ys.get(i)).append(")");
+        }
+
+        output.append("\n(b) Original Regression Line:");
+        output.append("\n    • \"").append(this.regressionLine).append("\"");
+
+        output.append("\n(c) Four (Lambda, E_in, E_cv) Triplets:");
+        output.append("\n    • (").append(this.lambdas.get(0)).append(", ").append(this.E_ins.get(0)).append(", ").append(this.E_cvs.get(0)).append(")");
+        output.append("\n    • (").append(this.lambdas.get(1)).append(", ").append(this.E_ins.get(1)).append(", ").append(this.E_cvs.get(1)).append(")");
+        output.append("\n    • (").append(this.lambdas.get(2)).append(", ").append(this.E_ins.get(2)).append(", ").append(this.E_cvs.get(2)).append(")");
+        output.append("\n    • (").append(this.lambdas.get(3)).append(", ").append(this.E_ins.get(3)).append(", ").append(this.E_cvs.get(3)).append(")");
+
+        output.append("\n(d) Final Lambda:");
+        output.append("\n    • ").append(this.finalLambda);
+
+        output.append("\n(e) Regularized Regression Line:");
+        output.append("\n    • \"").append(this.regularizedRegressionLine).append("\"");
+        output.append("\n    Final E_in:");
+        output.append("\n    • ").append(this.final_E_in);
+
+        return output.toString();
     }
 }
