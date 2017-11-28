@@ -16,6 +16,9 @@ public class Project5 {
             Ys.add(randomSampleFunction(X));
         }
 
+        System.out.println(Xs);
+        System.out.println(Ys);
+
         LinearRegression linearRegression = new LinearRegression(Xs, Ys);
     }
 
@@ -156,11 +159,17 @@ class LinearRegression {
     }
 
     private String calculateRegularizedRegression() {
-        double optimalLambda = this.determineOptimalLambdaViaCrossValidation();
+        System.out.println("Calculating regularized regression line...");
 
-        System.out.println("Optimal Lambda: " + optimalLambda);
+        String regularizedRegressionLine;
 
-        return "y=" + this.a + (this.b >= 0 ? "*x+" + this.b : "*x-" + -this.b);
+        double optimalLambda = this.calculateOptimalLambdaViaCrossValidation();
+
+        //Do something else here
+
+        regularizedRegressionLine = "y=" + this.a + (this.b >= 0 ? "*x+" + this.b : "*x-" + -this.b);
+        System.out.println("Regularized regression line is: \"" + regularizedRegressionLine + "\"");
+        return regularizedRegressionLine;
     }
 
     private double ridgeRegression(final double lambda) {
@@ -173,24 +182,36 @@ class LinearRegression {
         return calculate_E_in(this.weights, this.Xs, this.Ys) + lambda * wTw;
     }
 
-    private double determineOptimalLambdaViaCrossValidation() {
-        double smallest_E_cv = Double.MAX_VALUE;
-        double mostAppropriateLambda = LinearRegression.LAMBDAS.get(0);
+    private double calculateOptimalLambdaViaCrossValidation() {
+        System.out.println("--Calculate optimal lambda (min(for each lambda: E_cv(lambda))...");
 
-        for (int i = 1; i < LinearRegression.LAMBDAS.size(); i++) {
+        double smallest_E_cv = Double.MAX_VALUE;
+        double optimalLambda = LinearRegression.LAMBDAS.get(0);
+
+        for (int i = 0; i < LinearRegression.LAMBDAS.size(); i++) {
+            System.out.println("----Trying lambda \"" + LinearRegression.LAMBDAS.get(i) + "\"...");
+
             double current_E_cv = this.calculate_E_cv(this.weights, LinearRegression.LAMBDAS.get(i));
 
             if (current_E_cv < smallest_E_cv) {
+                System.out.println("----This lambda's E_cv (lambda: \"" + LinearRegression.LAMBDAS.get(i) + "\", E_cv: \"" + current_E_cv + "\") is better than the best lambda's E_cv so far (lambda: \"" + optimalLambda + "\", E_cv: \"" + smallest_E_cv + "\"), reassigning it.");
+
                 smallest_E_cv = current_E_cv;
-                mostAppropriateLambda = LinearRegression.LAMBDAS.get(i);
+                optimalLambda = LinearRegression.LAMBDAS.get(i);
+            } else {
+                System.out.println("----This lambda's E_cv (lambda: \"" + LinearRegression.LAMBDAS.get(i) + "\", E_cv: \"" + current_E_cv + "\") is NOT better than the best lambda's E_cv so far (lambda: \"" + optimalLambda + "\", E_cv: \"" + smallest_E_cv + "\").");
             }
         }
 
-        return mostAppropriateLambda;
+        System.out.println("--Calculate optimal lambda is \"" + optimalLambda + "\".");
+        return optimalLambda;
     }
 
     private double calculate_E_cv(final ArrayList<Double> weights, final double lambda) {
-        ArrayList<Double> allLeaveOneOut_E_in = new ArrayList<>();
+        System.out.println("------Calculating E_cv for lambda \"" + lambda + "\" ((sum(for each leaveOneOut set: leaveOneOut_E_aug(lambda))) / n)...");
+
+        double E_cv;
+        ArrayList<Double> allLeaveOneOut_E_aug = new ArrayList<>();
 
         for (int i = 0; i < this.n; i++) {
             final ArrayList<Double> leaveOneOutXs = new ArrayList<>();
@@ -198,48 +219,64 @@ class LinearRegression {
 
             for (int j = 0; j < this.n; j++) {
                 if (i != j) {
-                    leaveOneOutXs.add(this.Xs.get(i));
-                    leaveOneOutYs.add(this.Ys.get(i));
+                    leaveOneOutXs.add(this.Xs.get(j));
+                    leaveOneOutYs.add(this.Ys.get(j));
                 }
             }
 
-            allLeaveOneOut_E_in.add(calculate_E_aug(weights, leaveOneOutXs, leaveOneOutYs, lambda));
+            allLeaveOneOut_E_aug.add(calculate_E_aug(weights, leaveOneOutXs, leaveOneOutYs, lambda));
         }
 
-        Double sumLeaveOneOut_E_in = 0.0;
-        for (int i = 0; i < allLeaveOneOut_E_in.size(); i++) {
-            sumLeaveOneOut_E_in += allLeaveOneOut_E_in.get(i);
+        Double sumLeaveOneOut_E_aug = 0.0;
+        for (int i = 0; i < allLeaveOneOut_E_aug.size(); i++) {
+            sumLeaveOneOut_E_aug += allLeaveOneOut_E_aug.get(i);
         }
 
-        return sumLeaveOneOut_E_in / this.n;
+        E_cv = sumLeaveOneOut_E_aug / this.n;
+        System.out.println("------Calculated E_cv for lambda \"" + lambda + "\" to be \"" + E_cv + "\".");
+        return E_cv;
     }
 
     private double calculate_E_aug(final ArrayList<Double> weights, final ArrayList<Double> Xs, final ArrayList<Double> Ys, final double lambda) {
+        System.out.println("--------Calculating E_aug for lambda \"" + lambda + "\" (E_in + lambda * wTw)...");
+
+        double E_aug;
         double wTw = 0.0;
 
         for (final double weight : weights) {
             wTw += Math.pow(weight, 2);
         }
 
-        return this.calculate_E_in(weights, Xs, Ys) + lambda * wTw;
+        E_aug = this.calculate_E_in(weights, Xs, Ys) + lambda * wTw;
+        System.out.println("--------Calculated E_aug for lambda \"" + lambda + "\" to be \"" + E_aug + "\".");
+        return E_aug;
     }
 
     private double calculate_E_in(final ArrayList<Double> weights, final ArrayList<Double> Xs, final ArrayList<Double> Ys) {
+        System.out.println("----------Calculating E_in ((sum((wTx - y)^2))/n)...");
+
+        double E_in;
         final int n = Xs.size();
 
-        double E_in = 0.0;
+        double sumE_in = 0.0;
 
         for (int i = 0; i < n; i++) {
             final double X_i = Xs.get(i);
             final double Y_i = Ys.get(i);
 
-            E_in += Math.pow((this.calculate_wTx(weights, X_i) - Y_i), 2);
+            sumE_in += Math.pow((this.calculate_wTx(weights, X_i) - Y_i), 2);
         }
 
-        return E_in / n;
+        E_in = sumE_in / n;
+        System.out.println("----------Calculated E_in to be \"" + E_in + "\".");
+        return E_in;
     }
 
     private double calculate_wTx(final ArrayList<Double> weights, final double X_1) {
-        return weights.get(0) * LinearRegression.X_0 + weights.get(1) * X_1;
+        System.out.println("------------Calculating wTx (" + weights.get(0) + " * " + LinearRegression.X_0 + " + " + weights.get(1) + " * " + X_1 + ")...");
+
+        double wTx = weights.get(0) * LinearRegression.X_0 + weights.get(1) * X_1;
+        System.out.println("------------Calculated wTx to be \"" + wTx + "\".");
+        return wTx;
     }
 }
