@@ -3,71 +3,6 @@ import org.ejml.simple.SimpleMatrix;
 import java.util.Arrays;
 
 public class Project5 {
-    public static void smain(String[] args) {
-        SimpleMatrix a = new SimpleMatrix(new double[][]{
-                new double[]{1, 2, 3},
-                new double[]{4, 5, 6},
-                new double[]{7, 8, 9}
-        });
-
-        SimpleMatrix i = SimpleMatrix.identity(a.numRows());
-
-        System.out.println(a);
-        System.out.println(i);
-        System.out.println(i.scale(5));
-        System.out.println(a.plus(i.scale(5)));
-
-//        double[][] XData = new double[][]{
-//                new double[]{LinearRegression.X_0, 1},
-//                new double[]{LinearRegression.X_0, 2},
-//                new double[]{LinearRegression.X_0, 3},
-//                new double[]{LinearRegression.X_0, 4},
-//                new double[]{LinearRegression.X_0, 5},
-//                new double[]{LinearRegression.X_0, 6},
-//                new double[]{LinearRegression.X_0, 7},
-//                new double[]{LinearRegression.X_0, 8},
-//        };
-//
-//        SimpleMatrix X_matrix = new SimpleMatrix(XData);
-//        SimpleMatrix XTransposeMatrix = X_matrix.transpose();
-//
-//        double[][] YData = new double[][]{
-//                new double[]{0},
-//                new double[]{1},
-//                new double[]{0},
-//                new double[]{1},
-//                new double[]{0},
-//                new double[]{1},
-//                new double[]{1},
-//                new double[]{1},
-//        };
-//
-//        SimpleMatrix Y_matrix = new SimpleMatrix(YData);
-//
-//        SimpleMatrix XSwordMatrix = XTransposeMatrix.mult(X_matrix).invert().mult(XTransposeMatrix);
-//
-//        System.out.println("X_matrix:\n" + X_matrix.toString());
-//        System.out.println("\nXTransposeMatrix:\n" + XTransposeMatrix.toString());
-//        System.out.println("\nY_matrix:\n" + Y_matrix.toString());
-//        System.out.println("\nXSwordMatrix:\n" + XSwordMatrix.toString());
-//        System.out.println("\nXSword*y:\n" + XSwordMatrix.mult(Y_matrix));
-//        System.out.println("\nXT*y:\n" + XTransposeMatrix.mult(Y_matrix));
-//        System.out.println("\n(XT*X)^-1*XT*y:\n" + XSwordMatrix.mult(Y_matrix));
-//        System.out.println("=========================");
-//        System.out.println(XTransposeMatrix.mult(X_matrix).mult(XSwordMatrix.mult(Y_matrix)));
-//        System.out.println(XTransposeMatrix.mult(Y_matrix));
-//        System.out.println("========================");
-//        System.out.println(XSwordMatrix.mult(Y_matrix));
-//
-//        SimpleMatrix finalSolution = XSwordMatrix.mult(Y_matrix);
-//        double W_0 = finalSolution.get(0, 0);
-//        double W_1 = finalSolution.get(1, 0);
-//        System.out.println("W_0: " + W_0);
-//        System.out.println("W_1: " + W_1);
-//
-//        System.out.println("y=" + W_1 + "*x+" + W_0);
-    }
-
     private static final double RANDOM_DOUBLE_LOWER_BOUND = -2;
     private static final double RANDOM_DOUBLE_UPPER_BOUND = 10;
 
@@ -293,11 +228,15 @@ class LinearRegression {
     }
 
     private double calculate_E_val(final SimpleMatrix W_lin, final SimpleMatrix leaveNOut_X_matrix, final SimpleMatrix leaveNOut_Y_matrix, final double lambda, final int K) {
-        return calculate_E_aug(W_lin, leaveNOut_X_matrix, leaveNOut_Y_matrix, lambda) / K;
+        System.out.println("--------Calculating E_val for lambda \"" + lambda + "\" on data set of size \"" + K + "\" (E_aug / K)...");
+
+        double E_val = calculate_E_aug(W_lin, leaveNOut_X_matrix, leaveNOut_Y_matrix, lambda) / K;
+        System.out.println("--------Calculated E_val for lambda \"" + lambda + "\" on data set of size \"" + K + "\" to be \"" + E_val + "\".");
+        return E_val;
     }
 
     private double calculate_E_aug(final SimpleMatrix weightMatrix, final SimpleMatrix X_matrix, final SimpleMatrix Y_matrix, final double lambda) {
-        System.out.println("--------Calculating E_aug for lambda \"" + lambda + "\" (E_in + lambda * wTw)...");
+        System.out.println("----------Calculating E_aug for lambda \"" + lambda + "\" (E_in + lambda * wTw)...");
 
         double E_aug;
         double wTw = 0.0;
@@ -307,12 +246,12 @@ class LinearRegression {
         }
 
         E_aug = this.calculate_E_in(weightMatrix, X_matrix, Y_matrix) + lambda * wTw; // Ridge regression happens here.
-        System.out.println("--------Calculated E_aug for lambda \"" + lambda + "\" to be \"" + E_aug + "\".");
+        System.out.println("----------Calculated E_aug for lambda \"" + lambda + "\" to be \"" + E_aug + "\".");
         return E_aug;
     }
 
     private double calculate_E_in(final SimpleMatrix weightMatrix, final SimpleMatrix X_matrix, final SimpleMatrix Y_matrix) {
-        System.out.println("----------Calculating E_in ((sum((wTx - y)^2))/n)...");
+        System.out.println("------------Calculating E_in ((sum((wTx - y)^2))/n)...");
 
         double E_in;
 
@@ -326,15 +265,15 @@ class LinearRegression {
         }
 
         E_in = sumE_in / Project5.N;
-        System.out.println("----------Calculated E_in to be \"" + E_in + "\".");
+        System.out.println("------------Calculated E_in to be \"" + E_in + "\".");
         return E_in;
     }
 
     private double calculate_wTx(final SimpleMatrix weightMatrix, final double X_1) {
-        System.out.println("------------Calculating wTx (" + weightMatrix.get(0, 0) + " * " + LinearRegression.X_0 + " + " + weightMatrix.get(1, 0) + " * " + X_1 + ")...");
+        System.out.println("--------------Calculating wTx (" + weightMatrix.get(0, 0) + " * " + LinearRegression.X_0 + " + " + weightMatrix.get(1, 0) + " * " + X_1 + ")...");
 
         double wTx = weightMatrix.get(0, 0) * LinearRegression.X_0 + weightMatrix.get(1, 0) * X_1;
-        System.out.println("------------Calculated wTx to be \"" + wTx + "\".");
+        System.out.println("--------------Calculated wTx to be \"" + wTx + "\".");
         return wTx;
     }
 }
