@@ -3,82 +3,96 @@ import org.ejml.simple.SimpleMatrix;
 import java.util.Arrays;
 
 public class Project5 {
-    public static void wmain(String[] args) {
-        double[][] XData = new double[][]{
-                new double[]{LinearRegression.X_0, 1},
-                new double[]{LinearRegression.X_0, 2},
-                new double[]{LinearRegression.X_0, 3},
-                new double[]{LinearRegression.X_0, 4},
-                new double[]{LinearRegression.X_0, 5},
-                new double[]{LinearRegression.X_0, 6},
-                new double[]{LinearRegression.X_0, 7},
-                new double[]{LinearRegression.X_0, 8},
-        };
+    public static void smain(String[] args) {
+        SimpleMatrix a = new SimpleMatrix(new double[][]{
+                new double[]{1, 2, 3},
+                new double[]{4, 5, 6},
+                new double[]{7, 8, 9}
+        });
 
-        SimpleMatrix XMatrix = new SimpleMatrix(XData);
-        SimpleMatrix XTransposeMatrix = XMatrix.transpose();
+        SimpleMatrix i = SimpleMatrix.identity(a.numRows());
 
-        double[][] YData = new double[][]{
-                new double[]{0},
-                new double[]{1},
-                new double[]{0},
-                new double[]{1},
-                new double[]{0},
-                new double[]{1},
-                new double[]{1},
-                new double[]{1},
-        };
+        System.out.println(a);
+        System.out.println(i);
+        System.out.println(i.scale(5));
+        System.out.println(a.plus(i.scale(5)));
 
-        SimpleMatrix YMatrix = new SimpleMatrix(YData);
-
-        SimpleMatrix XSwordMatrix = XTransposeMatrix.mult(XMatrix).invert().mult(XTransposeMatrix);
-
-        System.out.println("XMatrix:\n" + XMatrix.toString());
-        System.out.println("\nXTransposeMatrix:\n" + XTransposeMatrix.toString());
-        System.out.println("\nYMatrix:\n" + YMatrix.toString());
-        System.out.println("\nXSwordMatrix:\n" + XSwordMatrix.toString());
-        System.out.println("\nXSword*y:\n" + XSwordMatrix.mult(YMatrix));
-        System.out.println("\nXT*y:\n" + XTransposeMatrix.mult(YMatrix));
-        System.out.println("\n(XT*X)^-1*XT*y:\n" + XSwordMatrix.mult(YMatrix));
-        System.out.println("=========================");
-        System.out.println(XTransposeMatrix.mult(XMatrix).mult(XSwordMatrix.mult(YMatrix)));
-        System.out.println(XTransposeMatrix.mult(YMatrix));
-        System.out.println("========================");
-        System.out.println(XSwordMatrix.mult(YMatrix));
-
-        SimpleMatrix finalSolution = XSwordMatrix.mult(YMatrix);
-        double W_0 = finalSolution.get(0, 0);
-        double W_1 = finalSolution.get(1, 0);
-        System.out.println("W_0: " + W_0);
-        System.out.println("W_1: " + W_1);
-
-        System.out.println("y=" + W_1 + "*x+" + W_0);
+//        double[][] XData = new double[][]{
+//                new double[]{LinearRegression.X_0, 1},
+//                new double[]{LinearRegression.X_0, 2},
+//                new double[]{LinearRegression.X_0, 3},
+//                new double[]{LinearRegression.X_0, 4},
+//                new double[]{LinearRegression.X_0, 5},
+//                new double[]{LinearRegression.X_0, 6},
+//                new double[]{LinearRegression.X_0, 7},
+//                new double[]{LinearRegression.X_0, 8},
+//        };
+//
+//        SimpleMatrix X_matrix = new SimpleMatrix(XData);
+//        SimpleMatrix XTransposeMatrix = X_matrix.transpose();
+//
+//        double[][] YData = new double[][]{
+//                new double[]{0},
+//                new double[]{1},
+//                new double[]{0},
+//                new double[]{1},
+//                new double[]{0},
+//                new double[]{1},
+//                new double[]{1},
+//                new double[]{1},
+//        };
+//
+//        SimpleMatrix Y_matrix = new SimpleMatrix(YData);
+//
+//        SimpleMatrix XSwordMatrix = XTransposeMatrix.mult(X_matrix).invert().mult(XTransposeMatrix);
+//
+//        System.out.println("X_matrix:\n" + X_matrix.toString());
+//        System.out.println("\nXTransposeMatrix:\n" + XTransposeMatrix.toString());
+//        System.out.println("\nY_matrix:\n" + Y_matrix.toString());
+//        System.out.println("\nXSwordMatrix:\n" + XSwordMatrix.toString());
+//        System.out.println("\nXSword*y:\n" + XSwordMatrix.mult(Y_matrix));
+//        System.out.println("\nXT*y:\n" + XTransposeMatrix.mult(Y_matrix));
+//        System.out.println("\n(XT*X)^-1*XT*y:\n" + XSwordMatrix.mult(Y_matrix));
+//        System.out.println("=========================");
+//        System.out.println(XTransposeMatrix.mult(X_matrix).mult(XSwordMatrix.mult(Y_matrix)));
+//        System.out.println(XTransposeMatrix.mult(Y_matrix));
+//        System.out.println("========================");
+//        System.out.println(XSwordMatrix.mult(Y_matrix));
+//
+//        SimpleMatrix finalSolution = XSwordMatrix.mult(Y_matrix);
+//        double W_0 = finalSolution.get(0, 0);
+//        double W_1 = finalSolution.get(1, 0);
+//        System.out.println("W_0: " + W_0);
+//        System.out.println("W_1: " + W_1);
+//
+//        System.out.println("y=" + W_1 + "*x+" + W_0);
     }
 
     private static final double RANDOM_DOUBLE_LOWER_BOUND = -2;
     private static final double RANDOM_DOUBLE_UPPER_BOUND = 10;
 
-    static final int QUANTITY_COORDINATES = 12;
+    static final int N = 12;
+    static final int K = 3;
 
     public static void main(final String[] args) throws Exception {
-        final double[][] XData = new double[QUANTITY_COORDINATES][];
-        for (int i = 0; i < Project5.QUANTITY_COORDINATES; i++) {
+        final double[][] XData = new double[N][];
+        for (int i = 0; i < Project5.N; i++) {
             XData[i] = new double[]{
                     LinearRegression.X_0,
                     Project5.randomDouble(Project5.RANDOM_DOUBLE_LOWER_BOUND, Project5.RANDOM_DOUBLE_UPPER_BOUND)
             };
         }
-        final SimpleMatrix XMatrix = new SimpleMatrix(XData);
+        final SimpleMatrix X_matrix = new SimpleMatrix(XData);
 
-        final double[][] YData = new double[QUANTITY_COORDINATES][];
-        for (int i = 0; i < Project5.QUANTITY_COORDINATES; i++) {
+        final double[][] YData = new double[N][];
+        for (int i = 0; i < Project5.N; i++) {
             YData[i] = new double[]{
                     randomSampleFunction(XData[i][1])
             };
         }
-        final SimpleMatrix YMatrix = new SimpleMatrix(YData);
+        final SimpleMatrix Y_matrix = new SimpleMatrix(YData);
 
-        final LinearRegression linearRegression = new LinearRegression(XMatrix, YMatrix);
+        final LinearRegression linearRegression = new LinearRegression(X_matrix, Y_matrix);
         System.out.println(linearRegression.getLinearRegressionResult().toResultString());
     }
 
@@ -100,35 +114,37 @@ class LinearRegression {
     private static final double[] LAMBDAS = new double[]{LAMBDA_1, LAMBDA_2, LAMBDA_3, LAMBDA_4};
 
     private final LinearRegressionResult linearRegressionResult;
-    private final SimpleMatrix XMatrix;
-    private final SimpleMatrix YMatrix;
-    private final double[] weights;
+    private final SimpleMatrix X_matrix;
+    private final SimpleMatrix Y_matrix;
     private final String regressionLine;
     private final String regularizedRegressionLine;
 
-    LinearRegression(final SimpleMatrix XMatrix, final SimpleMatrix YMatrix) throws Exception {
+    LinearRegression(final SimpleMatrix X_matrix, final SimpleMatrix Y_matrix) throws Exception {
         this.linearRegressionResult = new LinearRegressionResult();
         this.linearRegressionResult.setLambdas(LinearRegression.LAMBDAS);
 
-        if (XMatrix.numRows() == YMatrix.numRows()) {
-            this.XMatrix = XMatrix;
-            this.linearRegressionResult.setXMatrix(this.XMatrix);
+        if (X_matrix.numRows() == Y_matrix.numRows()) {
+            this.X_matrix = X_matrix;
+            this.linearRegressionResult.set__X_matrix(this.X_matrix);
 
-            this.YMatrix = YMatrix;
-            this.linearRegressionResult.setYMatrix(this.YMatrix);
-
-            this.weights = new double[Project5.QUANTITY_COORDINATES];
-
-            this.weights[0] = Math.random(); // Bias Weight
-            this.weights[1] = Math.random(); // X_1 Weight
+            this.Y_matrix = Y_matrix;
+            this.linearRegressionResult.set__Y_matrix(this.Y_matrix);
 
             this.regressionLine = this.calculateRegressionLine();
             this.linearRegressionResult.setRegressionLine(this.regressionLine);
 
-            this.regularizedRegressionLine = this.calculateRegularizedRegression();
+            SimpleMatrix weightMatrix = new SimpleMatrix(new double[][]{
+                    new double[]{
+                            Math.random() // Bias Weight
+                    },
+                    new double[]{
+                            Math.random() // X_1 Weight
+                    }
+            });
+            this.regularizedRegressionLine = this.calculateRegularizedRegressionLine(weightMatrix);
             this.linearRegressionResult.setRegularizedRegressionLine(this.regularizedRegressionLine);
         } else {
-            throw new Exception("Number of XMatrix and number of YMatrix differ, cannot preform linear regression.");
+            throw new Exception("Number of X_matrix and number of Y_matrix differ, cannot preform linear regression.");
         }
     }
 
@@ -140,36 +156,53 @@ class LinearRegression {
     public String toString() {
         return "LinearRegression{" +
                 "linearRegressionResult=" + this.linearRegressionResult +
-                ", XMatrix=" + this.XMatrix +
-                ", YMatrix=" + this.YMatrix +
-                ", weights=" + Arrays.toString(this.weights) +
+                ", X_matrix=" + this.X_matrix +
+                ", Y_matrix=" + this.Y_matrix +
                 ", regressionLine='" + this.regressionLine + '\'' +
                 ", regularizedRegressionLine='" + this.regularizedRegressionLine + '\'' +
                 '}';
     }
 
     private String calculateRegressionLine() {
-        return "";
-//        return this.calculate_X_sword().toString();
+        SimpleMatrix XSwordMatrix = this.calculate_X_sword(this.X_matrix);
+        SimpleMatrix W_lin = this.calculate_W_lin(XSwordMatrix, this.Y_matrix);
+
+        return "y=" + W_lin.get(1, 0) + "*x+" + W_lin.get(0, 0);
     }
 
-    private String calculateRegularizedRegression() {
+    private SimpleMatrix calculate_X_sword(final SimpleMatrix X_matrix) {
+        return X_matrix.transpose().mult(X_matrix).invert().mult(X_matrix.transpose());
+    }
+
+    private SimpleMatrix calculate_W_lin(final SimpleMatrix XSwordMatrix, final SimpleMatrix Y_matrix) {
+        return XSwordMatrix.mult(Y_matrix);
+    }
+
+    private String calculateRegularizedRegressionLine(final SimpleMatrix weightMatrix) {
         System.out.println("Calculating regularized regression line...");
 
         String regularizedRegressionLine;
 
-        double optimalLambda = this.calculateOptimalLambdaViaCrossValidation();
+        double optimalLambda = this.calculateOptimalLambdaViaCrossValidation(weightMatrix);
         this.linearRegressionResult.setFinalLambda(optimalLambda);
 
-        final double final_E_in = this.calculate_E_aug(this.weights, this.XMatrix, this.YMatrix, optimalLambda);
+        final double final_E_in = this.calculate_E_aug(weightMatrix, this.X_matrix, this.Y_matrix, optimalLambda);
         this.linearRegressionResult.setFinal_E_in(final_E_in);
 
-        regularizedRegressionLine = "y=swag";
+        SimpleMatrix regularized_X_sword_matrix = this.calculate_regularized_X_sword(this.X_matrix, optimalLambda);
+        SimpleMatrix regularized_W_lin = this.calculate_W_lin(regularized_X_sword_matrix, this.Y_matrix);
+
+        regularizedRegressionLine = "y=" + regularized_W_lin.get(1, 0) + "*x+" + regularized_W_lin.get(0, 0);
+
         System.out.println("Regularized regression line is: \"" + regularizedRegressionLine + "\"");
         return regularizedRegressionLine;
     }
 
-    private double calculateOptimalLambdaViaCrossValidation() {
+    private SimpleMatrix calculate_regularized_X_sword(final SimpleMatrix X_matrix, final double lambda) {
+        return X_matrix.transpose().mult(X_matrix).plus(SimpleMatrix.identity(X_matrix.numCols()).scale(lambda)).invert().mult(X_matrix.transpose());
+    }
+
+    private double calculateOptimalLambdaViaCrossValidation(final SimpleMatrix weightMatrix) {
         System.out.println("--Calculate optimal lambda (min(for each lambda: E_cv(lambda))...");
 
         double smallest_E_cv = Double.MAX_VALUE;
@@ -178,10 +211,10 @@ class LinearRegression {
         for (int i = 0; i < LinearRegression.LAMBDAS.length; i++) {
             System.out.println("----Trying lambda \"" + LinearRegression.LAMBDAS[i] + "\"...");
 
-            double current_E_cv = this.calculate_E_cv(this.weights, LinearRegression.LAMBDAS[i]);
+            double current_E_cv = this.calculate_E_cv(LinearRegression.LAMBDAS[i]);
 
             double[] temporaryResult_E_ins = this.linearRegressionResult.getE_ins();
-            temporaryResult_E_ins[i] = this.calculate_E_in(this.weights, this.XMatrix, this.YMatrix);
+            temporaryResult_E_ins[i] = this.calculate_E_aug(weightMatrix, this.X_matrix, this.Y_matrix, LinearRegression.LAMBDAS[i]);
             this.linearRegressionResult.setE_ins(temporaryResult_E_ins);
 
             double[] temporaryResult_E_Cvs = this.linearRegressionResult.getE_cvs();
@@ -202,97 +235,113 @@ class LinearRegression {
         return optimalLambda;
     }
 
-    private double calculate_E_cv(final double[] weights, final double lambda) {
-        System.out.println("------Calculating E_cv for lambda \"" + lambda + "\" ((sum(for each leaveOneOut set: leaveOneOut_E_aug(lambda))) / n)...");
+    private double calculate_E_cv(final double lambda) {
+        System.out.println("------Calculating E_cv for lambda \"" + lambda + "\" ((sum(for each leaveNOut set: leaveNOut_E_aug(lambda))) / n)...");
 
         double E_cv;
-        double[] allLeaveOneOut_E_aug = new double[Project5.QUANTITY_COORDINATES];
+        double[] all_E_val = new double[Project5.K];
 
-        for (int i = 0; i < Project5.QUANTITY_COORDINATES; i++) {
-            final double[][] leaveOneOutXData = new double[Project5.QUANTITY_COORDINATES - 1][];
-            final double[][] leaveOneOutYData = new double[Project5.QUANTITY_COORDINATES - 1][];
+        for (int i = 0; i < Project5.K; i++) {
+            final double[][] leaveNInXData = new double[Project5.N - Project5.K][];
+            final double[][] leaveNOutXData = new double[Project5.K][];
+            final double[][] leaveNInYData = new double[Project5.N - Project5.K][];
+            final double[][] leaveNOutYData = new double[Project5.K][];
 
-            int k = 0;
-            for (int j = 0; j < Project5.QUANTITY_COORDINATES; j++) {
-                if (i != j) {
-                    leaveOneOutXData[k] = new double[]{
-                            this.XMatrix.get(j, 0),
-                            this.XMatrix.get(j, 1)
+            int k_in = 0;
+            int k_out = 0;
+            for (int j = 0; j < Project5.N; j++) {
+                if (j < i * Project5.K || j >= (i + 1) * Project5.K) {
+                    leaveNInXData[k_in] = new double[]{
+                            this.X_matrix.get(j, 0),
+                            this.X_matrix.get(j, 1)
                     };
-                    leaveOneOutYData[k] = new double[]{
-                            this.YMatrix.get(j, 0)
+                    leaveNInYData[k_in] = new double[]{
+                            this.Y_matrix.get(j, 0)
                     };
 
-                    k++;
+                    k_in++;
+                } else {
+                    leaveNOutXData[k_out] = new double[]{
+                            this.X_matrix.get(j, 0),
+                            this.X_matrix.get(j, 1)
+                    };
+                    leaveNOutYData[k_out] = new double[]{
+                            this.Y_matrix.get(j, 0)
+                    };
+                    k_out++;
                 }
             }
-            SimpleMatrix leaveOneOutXMatrix = new SimpleMatrix(leaveOneOutXData);
-            SimpleMatrix leaveOneOutYMatrix = new SimpleMatrix(leaveOneOutYData);
+            SimpleMatrix leaveNIn_X_matrix = new SimpleMatrix(leaveNInXData);
+            SimpleMatrix leaveNIn_Y_matrix = new SimpleMatrix(leaveNInYData);
+            SimpleMatrix leaveNOut_X_matrix = new SimpleMatrix(leaveNOutXData);
+            SimpleMatrix leaveNOut_Y_matrix = new SimpleMatrix(leaveNOutYData);
 
-            allLeaveOneOut_E_aug[i] = calculate_E_aug(weights, leaveOneOutXMatrix, leaveOneOutYMatrix, lambda);
+            SimpleMatrix leaveNInXSwordMatrix = this.calculate_regularized_X_sword(leaveNIn_X_matrix, lambda);
+            SimpleMatrix leaveNIn_W_lin = this.calculate_W_lin(leaveNInXSwordMatrix, leaveNIn_Y_matrix);
+
+            all_E_val[i] = this.calculate_E_val(leaveNIn_W_lin, leaveNOut_X_matrix, leaveNOut_Y_matrix, lambda, Project5.K);
         }
 
-        Double sumLeaveOneOut_E_aug = 0.0;
-        for (final Double leaveOneOut_E_aug : allLeaveOneOut_E_aug) {
-            sumLeaveOneOut_E_aug += leaveOneOut_E_aug;
+        Double sum_E_val = 0.0;
+        for (final double E_val : all_E_val) {
+            sum_E_val += E_val;
         }
 
-        E_cv = sumLeaveOneOut_E_aug / Project5.QUANTITY_COORDINATES;
+        E_cv = sum_E_val / Project5.K;
         System.out.println("------Calculated E_cv for lambda \"" + lambda + "\" to be \"" + E_cv + "\".");
         return E_cv;
     }
 
-    private double calculate_E_aug(final double[] weights, final SimpleMatrix XMatrix, final SimpleMatrix YMatrix, final double lambda) {
+    private double calculate_E_val(final SimpleMatrix W_lin, final SimpleMatrix leaveNOut_X_matrix, final SimpleMatrix leaveNOut_Y_matrix, final double lambda, final int K) {
+        return calculate_E_aug(W_lin, leaveNOut_X_matrix, leaveNOut_Y_matrix, lambda) / K;
+    }
+
+    private double calculate_E_aug(final SimpleMatrix weightMatrix, final SimpleMatrix X_matrix, final SimpleMatrix Y_matrix, final double lambda) {
         System.out.println("--------Calculating E_aug for lambda \"" + lambda + "\" (E_in + lambda * wTw)...");
 
         double E_aug;
         double wTw = 0.0;
 
-        for (final double weight : weights) {
-            wTw += Math.pow(weight, 2);
+        for (int i = 0; i < weightMatrix.numRows(); i++) {
+            wTw += Math.pow(weightMatrix.get(i, 0), 2);
         }
 
-        E_aug = this.calculate_E_in(weights, XMatrix, YMatrix) + lambda * wTw; // Ridge regression happens here.
+        E_aug = this.calculate_E_in(weightMatrix, X_matrix, Y_matrix) + lambda * wTw; // Ridge regression happens here.
         System.out.println("--------Calculated E_aug for lambda \"" + lambda + "\" to be \"" + E_aug + "\".");
         return E_aug;
     }
 
-    private SimpleMatrix calculate_X_sword() {
-        SimpleMatrix a = new SimpleMatrix(this.XMatrix);
-        return a;
-    }
-
-    private double calculate_E_in(final double[] weights, final SimpleMatrix XMatrix, final SimpleMatrix YMatrix) {
+    private double calculate_E_in(final SimpleMatrix weightMatrix, final SimpleMatrix X_matrix, final SimpleMatrix Y_matrix) {
         System.out.println("----------Calculating E_in ((sum((wTx - y)^2))/n)...");
 
         double E_in;
 
         double sumE_in = 0.0;
 
-        for (int i = 0; i < XMatrix.numRows(); i++) {
-            final double X_i = XMatrix.get(i, 1);
-            final double Y_i = YMatrix.get(i, 0);
+        for (int i = 0; i < X_matrix.numRows(); i++) {
+            final double X_i = X_matrix.get(i, 1);
+            final double Y_i = Y_matrix.get(i, 0);
 
-            sumE_in += Math.pow((this.calculate_wTx(weights, X_i) - Y_i), 2);
+            sumE_in += Math.pow((this.calculate_wTx(weightMatrix, X_i) - Y_i), 2);
         }
 
-        E_in = sumE_in / Project5.QUANTITY_COORDINATES;
+        E_in = sumE_in / Project5.N;
         System.out.println("----------Calculated E_in to be \"" + E_in + "\".");
         return E_in;
     }
 
-    private double calculate_wTx(final double[] weights, final double X_1) {
-        System.out.println("------------Calculating wTx (" + weights[0] + " * " + LinearRegression.X_0 + " + " + weights[1] + " * " + X_1 + ")...");
+    private double calculate_wTx(final SimpleMatrix weightMatrix, final double X_1) {
+        System.out.println("------------Calculating wTx (" + weightMatrix.get(0, 0) + " * " + LinearRegression.X_0 + " + " + weightMatrix.get(1, 0) + " * " + X_1 + ")...");
 
-        double wTx = weights[0] * LinearRegression.X_0 + weights[1] * X_1;
+        double wTx = weightMatrix.get(0, 0) * LinearRegression.X_0 + weightMatrix.get(1, 0) * X_1;
         System.out.println("------------Calculated wTx to be \"" + wTx + "\".");
         return wTx;
     }
 }
 
 class LinearRegressionResult {
-    private SimpleMatrix XMatrix;
-    private SimpleMatrix YMatrix;
+    private SimpleMatrix X_matrix;
+    private SimpleMatrix Y_matrix;
     private String regressionLine;
     private double[] lambdas;
     private double[] E_ins = new double[4];
@@ -304,12 +353,12 @@ class LinearRegressionResult {
     LinearRegressionResult() {
     }
 
-    void setXMatrix(final SimpleMatrix XMatrix) {
-        this.XMatrix = XMatrix;
+    void set__X_matrix(final SimpleMatrix X_matrix) {
+        this.X_matrix = X_matrix;
     }
 
-    void setYMatrix(final SimpleMatrix YMatrix) {
-        this.YMatrix = YMatrix;
+    void set__Y_matrix(final SimpleMatrix Y_matrix) {
+        this.Y_matrix = Y_matrix;
     }
 
     void setRegressionLine(final String regressionLine) {
@@ -351,8 +400,8 @@ class LinearRegressionResult {
     @Override
     public String toString() {
         return "LinearRegressionResult{" +
-                "XMatrix=" + this.XMatrix +
-                ", YMatrix=" + this.YMatrix +
+                "_X_matrix=" + this.X_matrix +
+                ", Y_matrix=" + this.Y_matrix +
                 ", regressionLine='" + this.regressionLine + '\'' +
                 ", lambdas=" + Arrays.toString(this.lambdas) +
                 ", E_ins=" + Arrays.toString(this.E_ins) +
@@ -367,8 +416,8 @@ class LinearRegressionResult {
         StringBuilder output = new StringBuilder("\n========================= RESULTS =========================");
 
         output.append("\n(a) Twelve (X, Y) coordinate pairs: ");
-        for (int i = 0; i < Project5.QUANTITY_COORDINATES; i++) {
-            output.append("\n    • (").append(this.XMatrix.get(i, 1)).append(", ").append(this.YMatrix.get(i, 0)).append(")");
+        for (int i = 0; i < Project5.N; i++) {
+            output.append("\n    • (").append(this.X_matrix.get(i, 1)).append(", ").append(this.Y_matrix.get(i, 0)).append(")");
         }
 
         output.append("\n(b) Original Regression Line:");
